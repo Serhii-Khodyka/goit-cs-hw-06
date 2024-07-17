@@ -1,7 +1,7 @@
 import http.server
 import socketserver
 import socket
-import threading
+import multiprocessing
 import json
 import os
 from urllib.parse import urlparse, parse_qs
@@ -80,10 +80,14 @@ def start_socket_server():
         collection.insert_one(data_dict)
 
 if __name__ == "__main__":
-    # Start HTTP server in a separate thread
-    http_thread = threading.Thread(target=start_http_server)
-    http_thread.daemon = True
-    http_thread.start()
+   # запускаємо HTTP сервер
+    http_process = multiprocessing.Process(target=start_http_server)
+    http_process.start()
 
-    # Start socket server
-    start_socket_server()
+    # запускаємо socket сервер
+    socket_process = multiprocessing.Process(target=start_socket_server)
+    socket_process.start()
+
+    # чекаємо на запуск обох процесів
+    http_process.join()
+    socket_process.join()
